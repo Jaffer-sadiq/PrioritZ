@@ -23,60 +23,60 @@ jobs:
   export-from-dev:
     runs-on: windows-latest
     steps:
-      # Step 1: Install Power Platform CLI manually
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      # Step 2: Install Power Platform CLI manually
       - name: Install Power Platform CLI
         run: |
           Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
           Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber
+          pac install latest
         shell: pwsh
 
-      # Step 2: Validate installation
+      # Step 3: Validate installation
       - name: Validate PAC Installation
         run: |
           pac --version
         shell: pwsh
 
-      # Step 3: Checkout the repository
-      - uses: actions/checkout@v2
-        with:
-          lfs: true
-
       # Step 4: Export unmanaged solution
       - name: Export unmanaged solution
-        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
-        with:
-          environment-url: ${{ secrets.PowerPlatformDevUrl }}
-          app-id: ${{ secrets.PowerPlatformAppID }}
-          client-secret: ${{ secrets.PowerPlatformClientSecret }}
-          tenant-id: ${{ secrets.PowerPlatformTenantID }}
-          solution-name: ${{ github.event.inputs.solution_name }}
-          solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
+        run: |
+          pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
+            --name "${{ github.event.inputs.solution_name }}" `
+            --path "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip" `
+            --appId "${{ secrets.PowerPlatformAppID }}" `
+            --clientSecret "${{ secrets.PowerPlatformClientSecret }}" `
+            --tenantId "${{ secrets.PowerPlatformTenantID }}"
+        shell: pwsh
 
       # Step 5: Export managed solution
       - name: Export managed solution
-        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
-        with:
-          environment-url: ${{ secrets.PowerPlatformDevUrl }}
-          app-id: ${{ secrets.PowerPlatformAppID }}
-          client-secret: ${{ secrets.PowerPlatformClientSecret }}
-          tenant-id: ${{ secrets.PowerPlatformTenantID }}
-          solution-name: ${{ github.event.inputs.solution_name }}
-          solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}_managed.zip
-          managed: true
+        run: |
+          pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
+            --name "${{ github.event.inputs.solution_name }}" `
+            --path "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip" `
+            --appId "${{ secrets.PowerPlatformAppID }}" `
+            --clientSecret "${{ secrets.PowerPlatformClientSecret }}" `
+            --tenantId "${{ secrets.PowerPlatformTenantID }}" `
+            --managed true
+        shell: pwsh
 
       # Step 6: Unpack the solution
       - name: Unpack solution
-        uses: microsoft/powerplatform-actions/unpack-solution@v0.4.0
-        with:
-          solution-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
-          solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
-          solution-type: 'Both'
+        run: |
+          pac solution unpack `
+            --zipfile "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip" `
+            --folder "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}" `
+            --type Both
+        shell: pwsh
 
       # Step 7: Branch solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
-        uses: microsoft/powerplatform-actions/branch-solution@v0.4.0
-        with:
-          solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
-          solution-target-folder: ${{ github.event.inputs.solution_target_folder }}/{{ github.event.inputs.solution_name }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          allow-empty-commit: true
+        run: |
+          # Customize branching logic as needed
+          echo "Branching logic goes here"
+        shell: pwsh
