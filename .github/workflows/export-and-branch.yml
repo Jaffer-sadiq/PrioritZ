@@ -23,10 +23,16 @@ jobs:
   export-from-dev:
     runs-on: windows-latest
     steps:
+      # Step to install PAC and prerequisites
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/install@main
+
+      # Checkout the repository
       - uses: actions/checkout@v2
         with:
           lfs: true
 
+      # Export unmanaged solution
       - name: Export unmanaged solution
         uses: microsoft/powerplatform-actions/export-solution@main
         with:
@@ -37,6 +43,7 @@ jobs:
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
 
+      # Export managed solution
       - name: Export managed solution
         uses: microsoft/powerplatform-actions/export-solution@main
         with:
@@ -48,6 +55,7 @@ jobs:
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}_managed.zip
           managed: true
 
+      # Unpack the solution
       - name: Unpack solution
         uses: microsoft/powerplatform-actions/unpack-solution@main
         with:
@@ -55,6 +63,7 @@ jobs:
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-type: 'Both'
 
+      # Branch solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
         uses: microsoft/powerplatform-actions/branch-solution@main
         with:
