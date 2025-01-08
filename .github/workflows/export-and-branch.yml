@@ -23,23 +23,12 @@ jobs:
   export-from-dev:
     runs-on: windows-latest
     steps:
-      # Cache dependencies
-      - name: Cache Power Platform Actions
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-microsoft-powerplatform-actions-${{ github.sha }}
-
-      # Checkout repository with extended timeout
       - uses: actions/checkout@v2
         with:
           lfs: true
-          fetch-depth: 0
-          timeout-minutes: 10
 
-      # Export unmanaged solution
       - name: Export unmanaged solution
-        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
+        uses: microsoft/powerplatform-actions/export-solution@main
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -48,9 +37,8 @@ jobs:
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
 
-      # Export managed solution
       - name: Export managed solution
-        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
+        uses: microsoft/powerplatform-actions/export-solution@main
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -60,17 +48,15 @@ jobs:
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}_managed.zip
           managed: true
 
-      # Unpack the solution
       - name: Unpack solution
-        uses: microsoft/powerplatform-actions/unpack-solution@v0.4.0
+        uses: microsoft/powerplatform-actions/unpack-solution@main
         with:
           solution-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-type: 'Both'
 
-      # Branch the solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
-        uses: microsoft/powerplatform-actions/branch-solution@v0.4.0
+        uses: microsoft/powerplatform-actions/branch-solution@main
         with:
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-target-folder: ${{ github.event.inputs.solution_target_folder }}/{{ github.event.inputs.solution_name }}
