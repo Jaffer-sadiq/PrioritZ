@@ -2,12 +2,10 @@ name: export-and-branch
 on:
   workflow_dispatch:
     inputs:
-      # Change this value
       solution_name:
         description: 'Name of the solution to work on from Power Platform'
         required: true
         default: Prioritz
-      # Do not change these values
       solution_exported_folder:
         description: 'Folder name for staging the exported solution *do not change*'
         required: true
@@ -23,16 +21,25 @@ on:
 
 jobs:
   export-from-dev:
-    runs-on: windows-latest  # Switch to self-hosted if necessary
+    runs-on: windows-latest
     steps:
-      # Check out the repository
+      # Cache dependencies
+      - name: Cache Power Platform Actions
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-microsoft-powerplatform-actions-${{ github.sha }}
+
+      # Checkout repository with extended timeout
       - uses: actions/checkout@v2
         with:
           lfs: true
+          fetch-depth: 0
+          timeout-minutes: 10
 
       # Export unmanaged solution
       - name: Export unmanaged solution
-        uses: microsoft/powerplatform-actions/export-solution@0.4.0
+        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -41,14 +48,9 @@ jobs:
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
 
-      # Retry export if action fails
-      - name: Retry Export Unmanaged Solution
-        if: failure()
-        run: echo "Retrying export after failure..."
-
       # Export managed solution
       - name: Export managed solution
-        uses: microsoft/powerplatform-actions/export-solution@0.4.0
+        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -60,7 +62,7 @@ jobs:
 
       # Unpack the solution
       - name: Unpack solution
-        uses: microsoft/powerplatform-actions/unpack-solution@0.4.0
+        uses: microsoft/powerplatform-actions/unpack-solution@v0.4.0
         with:
           solution-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
@@ -68,7 +70,7 @@ jobs:
 
       # Branch the solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
-        uses: microsoft/powerplatform-actions/branch-solution@v0
+        uses: microsoft/powerplatform-actions/branch-solution@v0.4.0
         with:
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-target-folder: ${{ github.event.inputs.solution_target_folder }}/{{ github.event.inputs.solution_name }}
