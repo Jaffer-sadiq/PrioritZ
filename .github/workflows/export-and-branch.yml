@@ -23,18 +23,27 @@ jobs:
   export-from-dev:
     runs-on: windows-latest
     steps:
-      # Step to install PAC and prerequisites
+      # Step 1: Install Power Platform CLI manually
       - name: Install Power Platform CLI
-        uses: microsoft/powerplatform-actions/install@main
+        run: |
+          Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
+          Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber
+        shell: pwsh
 
-      # Checkout the repository
+      # Step 2: Validate installation
+      - name: Validate PAC Installation
+        run: |
+          pac --version
+        shell: pwsh
+
+      # Step 3: Checkout the repository
       - uses: actions/checkout@v2
         with:
           lfs: true
 
-      # Export unmanaged solution
+      # Step 4: Export unmanaged solution
       - name: Export unmanaged solution
-        uses: microsoft/powerplatform-actions/export-solution@main
+        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -43,9 +52,9 @@ jobs:
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
 
-      # Export managed solution
+      # Step 5: Export managed solution
       - name: Export managed solution
-        uses: microsoft/powerplatform-actions/export-solution@main
+        uses: microsoft/powerplatform-actions/export-solution@v0.4.0
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
           app-id: ${{ secrets.PowerPlatformAppID }}
@@ -55,17 +64,17 @@ jobs:
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}_managed.zip
           managed: true
 
-      # Unpack the solution
+      # Step 6: Unpack the solution
       - name: Unpack solution
-        uses: microsoft/powerplatform-actions/unpack-solution@main
+        uses: microsoft/powerplatform-actions/unpack-solution@v0.4.0
         with:
           solution-file: ${{ github.event.inputs.solution_exported_folder }}/{{ github.event.inputs.solution_name }}.zip
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-type: 'Both'
 
-      # Branch solution and prepare for Pull Request
+      # Step 7: Branch solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
-        uses: microsoft/powerplatform-actions/branch-solution@main
+        uses: microsoft/powerplatform-actions/branch-solution@v0.4.0
         with:
           solution-folder: ${{ github.event.inputs.solution_folder }}/{{ github.event.inputs.solution_name }}
           solution-target-folder: ${{ github.event.inputs.solution_target_folder }}/{{ github.event.inputs.solution_name }}
