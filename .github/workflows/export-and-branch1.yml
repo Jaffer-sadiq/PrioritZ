@@ -28,31 +28,26 @@ jobs:
         with:
           lfs: true
 
-      # Step 2: Install .NET SDK
-      - name: Install .NET SDK
-        run: |
-          choco install dotnet-sdk --version=6.0.100 --confirm
-        shell: pwsh
-
-      # Step 3: Install Power Platform CLI as a global tool
+      # Step 2: Download and install Power Platform CLI
       - name: Install Power Platform CLI
         run: |
-          dotnet tool install --global Microsoft.PowerApps.CLI
+          Invoke-WebRequest -Uri https://aka.ms/PowerAppsCLI -OutFile Install-CLI.ps1
+          .\Install-CLI.ps1
         shell: pwsh
 
-      # Step 4: Verify PAC Installation
+      # Step 3: Verify PAC Installation
       - name: Verify PAC Installation
         run: |
           pac --version
         shell: pwsh
 
-      # Step 5: Authenticate with Power Platform
+      # Step 4: Authenticate with Power Platform
       - name: Authenticate with Power Platform
         run: |
           pac auth create --url ${{ secrets.PowerPlatformDevUrl }} --clientId ${{ secrets.PowerPlatformAppID }} --clientSecret ${{ secrets.PowerPlatformClientSecret }} --tenantId ${{ secrets.PowerPlatformTenantID }}
         shell: pwsh
 
-      # Step 6: Export unmanaged solution
+      # Step 5: Export unmanaged solution
       - name: Export unmanaged solution
         run: |
           pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
@@ -61,7 +56,7 @@ jobs:
             --managed false
         shell: pwsh
 
-      # Step 7: Export managed solution
+      # Step 6: Export managed solution
       - name: Export managed solution
         run: |
           pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
@@ -70,7 +65,7 @@ jobs:
             --managed true
         shell: pwsh
 
-      # Step 8: Unpack the solution
+      # Step 7: Unpack the solution
       - name: Unpack solution
         run: |
           pac solution unpack `
@@ -79,7 +74,7 @@ jobs:
             --type Both
         shell: pwsh
 
-      # Step 9: Branch solution and prepare for Pull Request
+      # Step 8: Branch solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
         run: |
           # Customize branching logic as needed
