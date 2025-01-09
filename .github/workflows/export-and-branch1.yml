@@ -29,39 +29,39 @@ jobs:
           lfs: true
 
       # Step 2: Install Power Platform CLI
-      - name: Install Power Platform CLI
-        uses: microsoft/powerplatform-actions/install@v1
+      - name: Install Power Platform Tools
+        uses: microsoft/powerplatform-actions/actions-install@v1
 
       # Step 3: Export unmanaged solution
       - name: Export unmanaged solution
         uses: microsoft/powerplatform-actions/export-solution@v1
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
-          user-name: ${{ secrets.PowerPlatformUsername }}
-          password-secret: ${{ secrets.PowerPlatformPassword }}
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip
-          working-directory: out
+          application-id: ${{ secrets.PowerPlatformAppID }}
+          client-secret: ${{ secrets.PowerPlatformClientSecret }}
+          tenant-id: ${{ secrets.PowerPlatformTenantID }}
 
       # Step 4: Export managed solution
       - name: Export managed solution
         uses: microsoft/powerplatform-actions/export-solution@v1
         with:
           environment-url: ${{ secrets.PowerPlatformDevUrl }}
-          user-name: ${{ secrets.PowerPlatformUsername }}
-          password-secret: ${{ secrets.PowerPlatformPassword }}
           solution-name: ${{ github.event.inputs.solution_name }}
           solution-output-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip
+          application-id: ${{ secrets.PowerPlatformAppID }}
+          client-secret: ${{ secrets.PowerPlatformClientSecret }}
+          tenant-id: ${{ secrets.PowerPlatformTenantID }}
           managed: true
-          working-directory: out
 
       # Step 5: Unpack the solution
       - name: Unpack solution
         uses: microsoft/powerplatform-actions/unpack-solution@v1
         with:
           solution-file: ${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip
-          target-folder: ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
-          working-directory: out
+          solution-folder: ${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}
+          type: Both
 
       # Step 6: Branch solution and prepare for Pull Request
       - name: Branch solution and prepare for Pull Request
