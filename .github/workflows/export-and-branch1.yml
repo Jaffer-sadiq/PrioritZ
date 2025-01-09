@@ -31,6 +31,7 @@ jobs:
       # Step 2: Install Power Platform CLI manually
       - name: Install Power Platform CLI
         run: |
+          Remove-Module -Name Microsoft.PowerApps.PowerShell -Force
           Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
           Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber -Scope CurrentUser
           pac install latest
