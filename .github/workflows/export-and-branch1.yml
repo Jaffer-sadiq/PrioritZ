@@ -41,12 +41,6 @@ jobs:
           Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber -Scope CurrentUser
         shell: pwsh
 
-      # Step 3: Validate installation
-      - name: Validate PAC Installation
-        run: |
-          pac --version
-        shell: pwsh
-
       # Step 4: Export unmanaged solution
       - name: Export unmanaged solution
         run: |
