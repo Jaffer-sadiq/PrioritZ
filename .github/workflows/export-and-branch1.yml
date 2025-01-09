@@ -39,7 +39,6 @@ jobs:
         run: |
           Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -AllowClobber
           Install-Module -Name Microsoft.PowerApps.PowerShell -Force -AllowClobber -Scope CurrentUser
-          pac install latest
         shell: pwsh
 
       # Step 3: Validate installation
