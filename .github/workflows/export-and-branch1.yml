@@ -1,0 +1,86 @@
+name: export-and-branch
+on:
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: 'Name of the solution to work on from Power Platform'
+        required: true
+        default: Prioritz
+      solution_exported_folder:
+        description: 'Folder name for staging the exported solution *do not change*'
+        required: true
+        default: out/exported/
+      solution_folder:
+        description: 'Staging the unpacked solution folder before check-in *do not change*'
+        required: true
+        default: out/solutions/
+      solution_target_folder: 
+        description: 'Folder name to be created and checked in *do not change*'
+        required: true
+        default: solutions/
+
+jobs:
+  export-from-dev:
+    runs-on: windows-latest
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      # Step 2: Install Power Platform CLI manually
+      - name: Install Power Platform CLI
+        run: |
+          Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force -Scope CurrentUser
+          Install-Module -Name Microsoft.PowerApps.PowerShell -Force -Scope CurrentUser
+          $ErrorActionPreference = 'Stop'
+          Invoke-WebRequest -Uri https://aka.ms/PowerAppsCLI -OutFile pac_installer.exe
+          Start-Process -FilePath pac_installer.exe -ArgumentList '/quiet' -NoNewWindow -Wait
+          Remove-Item pac_installer.exe
+          pac install latest
+        shell: pwsh
+
+      # Step 3: Validate installation
+      - name: Validate PAC Installation
+        run: |
+          pac --version
+        shell: pwsh
+
+      # Step 4: Export unmanaged solution
+      - name: Export unmanaged solution
+        run: |
+          pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
+            --name "${{ github.event.inputs.solution_name }}" `
+            --path "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip" `
+            --appId "${{ secrets.PowerPlatformAppID }}" `
+            --clientSecret "${{ secrets.PowerPlatformClientSecret }}" `
+            --tenantId "${{ secrets.PowerPlatformTenantID }}"
+        shell: pwsh
+
+      # Step 5: Export managed solution
+      - name: Export managed solution
+        run: |
+          pac solution export --environment ${{ secrets.PowerPlatformDevUrl }} `
+            --name "${{ github.event.inputs.solution_name }}" `
+            --path "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}_managed.zip" `
+            --appId "${{ secrets.PowerPlatformAppID }}" `
+            --clientSecret "${{ secrets.PowerPlatformClientSecret }}" `
+            --tenantId "${{ secrets.PowerPlatformTenantID }}" `
+            --managed true
+        shell: pwsh
+
+      # Step 6: Unpack the solution
+      - name: Unpack solution
+        run: |
+          pac solution unpack `
+            --zipfile "${{ github.event.inputs.solution_exported_folder }}/${{ github.event.inputs.solution_name }}.zip" `
+            --folder "${{ github.event.inputs.solution_folder }}/${{ github.event.inputs.solution_name }}" `
+            --type Both
+        shell: pwsh
+
+      # Step 7: Branch solution and prepare for Pull Request
+      - name: Branch solution and prepare for Pull Request
+        run: |
+          # Customize branching logic as needed
+          echo "Branching logic goes here"
+        shell: pwsh
