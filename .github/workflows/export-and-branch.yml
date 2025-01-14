@@ -33,18 +33,16 @@ jobs:
       uses: microsoft/powerplatform-actions/export-solution@v1
       with:
        environment-url: ${{secrets.PowerPlatformDevUrl}}
-       app-id: ${{secrets.PowerPlatformAppID}}
-       client-secret: ${{ secrets.PowerPlatformClientSecret }}
-       tenant-id:  ${{ secrets.POWERPLATFORMTENANTID }}
+       user-name: ${{secrets.PowerPlatformAppID}}
+       password-secret: ${{ secrets.PowerPlatformClientSecret }}
        solution-name: ${{ github.event.inputs.solution_name }}
        solution-output-file: ${{github.event.inputs.solution_exported_folder}}/${{github.event.inputs.solution_name }}.zip
     - name: export-managed-solution action
       uses: microsoft/powerplatform-actions/export-solution@v1
       with:
        environment-url: ${{secrets.PowerPlatformDevUrl}}
-       app-id: ${{secrets.PowerPlatformAppID}}
-       client-secret: ${{ secrets.PowerPlatformClientSecret }}
-       tenant-id:  ${{ secrets.POWERPLATFORMTENANTID }}
+       user-name: ${{secrets.PowerPlatformAppID}}
+       password-secret: ${{ secrets.PowerPlatformClientSecret }}
        solution-name: ${{ github.event.inputs.solution_name }}
        solution-output-file: ${{github.event.inputs.solution_exported_folder}}/${{github.event.inputs.solution_name }}_managed.zip
        managed: true
