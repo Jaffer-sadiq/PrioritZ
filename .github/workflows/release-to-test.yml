@@ -65,6 +65,14 @@ jobs:
       with:
         name: managedSolutions
         path: ${{ env.solution_release_folder }}
+        
+    - name: Uninstall Unmanaged Solution (if exists)
+      uses: microsoft/powerplatform-actions/uninstall-solution@0.4.0
+      with:
+        environment-url: ${{ secrets.PowerPlatformDevUrl }}
+        user-name: ${{ secrets.PowerPlatformAppID }}
+        password-secret: ${{ secrets.PowerPlatformClientSecret }}
+        solution-name: ${{ env.solution_name }}
 
     # Import the managed solution into the target test environment
     - name: Import Solution to Test Environment
